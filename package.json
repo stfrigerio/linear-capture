@@ -1,0 +1,34 @@
+{
+  "name": "linear-capture",
+  "version": "1.0.0",
+  "description": "In-page visual bug reporter for Linear — point, annotate, file.",
+  "main": "dist/linear-capture.js",
+  "module": "dist/linear-capture.esm.js",
+  "exports": {
+    ".": {
+      "import": "./dist/linear-capture.esm.js",
+      "require": "./dist/linear-capture.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "node build.js",
+    "dev": "node build.js --watch",
+    "demo": "npx serve ."
+  },
+  "keywords": [
+    "linear",
+    "bug-reporter",
+    "visual-feedback",
+    "devtools",
+    "capture",
+    "screenshot"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "esbuild": "^0.25.0"
+  }
+}

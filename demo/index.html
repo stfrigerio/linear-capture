@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Linear Capture — Demo</title>
+  <style>
+    * { margin: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+      background: #f5f5f7;
+      color: #1a1a2e;
+      padding: 24px;
+      padding-bottom: 120px;
+      -webkit-font-smoothing: antialiased;
+    }
+    .hero {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    h1 {
+      font-size: 32px;
+      font-weight: 750;
+      letter-spacing: -0.03em;
+      margin-bottom: 6px;
+    }
+    .subtitle {
+      color: #888;
+      margin-bottom: 32px;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+    .subtitle kbd {
+      display: inline-block;
+      background: #e8e8ec;
+      padding: 2px 7px;
+      border-radius: 5px;
+      font-size: 12px;
+      font-family: 'SF Mono', SFMono-Regular, Consolas, monospace;
+      border: 1px solid #d0d0d4;
+    }
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 14px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+      transition: box-shadow 0.2s;
+    }
+    .card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,.08), 0 1px 3px rgba(0,0,0,.04);
+    }
+    .card h2 { font-size: 17px; font-weight: 650; margin-bottom: 8px; letter-spacing: -0.01em; }
+    .card p { color: #666; font-size: 14px; line-height: 1.5; }
+    .card code {
+      background: rgba(94,106,210,.08);
+      color: #5E6AD2;
+      padding: 2px 6px;
+      border-radius: 5px;
+      font-size: 12px;
+    }
+    .badge {
+      display: inline-block;
+      background: #5E6AD2;
+      color: #fff;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-top: 8px;
+    }
+    button.demo-btn {
+      background: #5E6AD2;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 24px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background 0.15s;
+    }
+    button.demo-btn:hover { background: #4F5ABF; }
+    .demo-form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .demo-form input {
+      padding: 10px 12px;
+      border: 1.5px solid #ddd;
+      border-radius: 10px;
+      font-size: 14px;
+      transition: border-color 0.2s;
+    }
+    .demo-form input:focus { outline: none; border-color: #5E6AD2; }
+    .tag-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+    .tag {
+      background: #f0f0f3;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      color: #555;
+      transition: background 0.15s;
+      cursor: default;
+    }
+    .tag:hover { background: #e4e4ea; }
+
+    .setup-banner {
+      background: linear-gradient(135deg, #5E6AD2 0%, #7C3AED 100%);
+      color: #fff;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    .setup-banner h2 {
+      font-size: 16px;
+      font-weight: 650;
+      margin-bottom: 8px;
+    }
+    .setup-banner p {
+      font-size: 13px;
+      line-height: 1.6;
+      opacity: 0.9;
+    }
+    .setup-banner ol {
+      margin-top: 10px;
+      padding-left: 20px;
+      font-size: 13px;
+      line-height: 1.8;
+    }
+    .setup-banner code {
+      background: rgba(255,255,255,0.2);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      body { background: #0f0f1a; color: #e0e0e0; }
+      .card { background: #1a1a2e; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+      .card:hover { box-shadow: 0 4px 12px rgba(0,0,0,.3); }
+      .card p { color: #aaa; }
+      .tag { background: #252540; color: #aaa; }
+      .tag:hover { background: #2a2a50; }
+      .subtitle kbd { background: #252540; border-color: #3a3a55; color: #ccc; }
+      .demo-form input {
+        background: #252540; border-color: #444; color: #e0e0e0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="hero">
+    <h1>Linear Capture</h1>
+    <p class="subtitle">
+      Click the target button or press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>K</kbd> to start picking elements.
+      <br/>Click the gear icon to configure your Linear API key.
+    </p>
+
+    <div class="setup-banner">
+      <h2>Quick Setup</h2>
+      <ol>
+        <li>Click the <strong>gear icon</strong> on the floating button (bottom-right)</li>
+        <li>Enter your Linear API key and Team ID</li>
+        <li>Pick any element below and file an issue!</li>
+      </ol>
+      <p style="margin-top:10px;opacity:0.7">
+        Settings are saved in your browser — configure once, use everywhere.
+      </p>
+    </div>
+
+    <!-- Sample elements to pick -->
+
+    <div class="card" data-component="HeroCard" data-testid="hero-card">
+      <h2>Hero Section</h2>
+      <p>This card has <code>data-component="HeroCard"</code> and a test ID. The picker will detect both.</p>
+      <span class="badge">Featured</span>
+    </div>
+
+    <div class="card" data-component="PricingCard">
+      <h2>Pricing</h2>
+      <p>$29/mo for the Pro plan. Includes unlimited tickets and integrations.</p>
+      <button class="demo-btn" data-testid="cta-button">Get Started</button>
+    </div>
+
+    <div class="card">
+      <h2>Contact Form</h2>
+      <p>A sample form to demonstrate input element picking.</p>
+      <div class="demo-form">
+        <input type="text" placeholder="Your name" data-field="name" />
+        <input type="email" placeholder="Email address" data-field="email" />
+        <button class="demo-btn">Submit</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Tags</h2>
+      <div class="tag-row">
+        <span class="tag" data-tag="bug">Bug</span>
+        <span class="tag" data-tag="feature">Feature</span>
+        <span class="tag" data-tag="improvement">Improvement</span>
+        <span class="tag" data-tag="question">Question</span>
+      </div>
+    </div>
+
+    <div class="card" data-component="StatusWidget">
+      <h2>System Status</h2>
+      <p>All systems operational. Last checked 2 minutes ago.</p>
+      <span class="badge" style="background:#30A46C">Healthy</span>
+    </div>
+
+    <div class="card" data-component="ErrorDemo">
+      <h2>Error Demo</h2>
+      <p>Click the button below to trigger a console error. Then pick any element — the error will appear in the captured context.</p>
+      <button class="demo-btn" onclick="console.error('Demo error: Something went wrong in ErrorDemo component'); fetch('/api/nonexistent').catch(()=>{});">
+        Trigger Error
+      </button>
+    </div>
+  </div>
+
+  <!-- Debug state for context builder to pick up -->
+  <script>
+    window.__DEBUG_STATE = {
+      user: { id: 'usr_demo_123', role: 'admin' },
+      featureFlags: { newDashboard: true, betaApi: false },
+      buildVersion: '1.4.2-rc.1',
+    };
+  </script>
+
+  <!-- Load Linear Capture (uses localStorage for API key — no config needed!) -->
+  <script>
+    window.__LINEAR_CAPTURE__ = {
+      // API key and team ID will be set via the settings panel
+      // and persisted in localStorage. No need to hardcode them!
+    };
+  </script>
+  <script src="../dist/linear-capture.js"></script>
+  <!-- For the demo, auto-activate without ?debug=1 -->
+  <script>
+    // If no ?debug=1 in URL, init manually for the demo
+    if (!new URLSearchParams(location.search).has('debug')) {
+      const lc = new LinearCapture.LinearCapture();
+      lc.init();
+    }
+  </script>
+
+</body>
+</html>

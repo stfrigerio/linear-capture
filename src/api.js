@@ -71,13 +71,14 @@ export class LinearClient {
     );
 
     const { uploadUrl, assetUrl, headers } = data.fileUpload.uploadFile;
-    const hdrs = {};
+    const hdrs = { 'Content-Type': blob.type };
     for (const h of headers) hdrs[h.key] = h.value;
-    hdrs['Content-Type'] = blob.type;
-    hdrs['Cache-Control'] = 'public, max-age=31536000';
 
     const up = await fetch(uploadUrl, { method: 'PUT', headers: hdrs, body: blob });
-    if (!up.ok) throw new Error(`Upload failed: ${up.status}`);
+    if (!up.ok) {
+      const text = await up.text().catch(() => '');
+      throw new Error(`Upload failed: ${up.status} ${up.statusText} ${text}`.trim());
+    }
 
     return assetUrl;
   }

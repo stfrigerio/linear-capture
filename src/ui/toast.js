@@ -12,7 +12,7 @@ export function showToast(message, type = '') {
   const icon = ICONS[type];
   el.innerHTML = (icon || '') + `<span>${escapeHtml(message)}</span>`;
 
-  document.body.appendChild(el);
+  (document.getElementById('lc-root') || document.body).appendChild(el);
   requestAnimationFrame(() => {
     requestAnimationFrame(() => el.classList.add('lc-visible'));
   });

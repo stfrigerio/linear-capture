@@ -146,8 +146,9 @@ export class BottomSheet {
     this._bindEvents();
     this._setupDrag();
 
-    document.body.appendChild(this._overlay);
-    document.body.appendChild(this._sheet);
+    const mount = document.getElementById('lc-root') || document.body;
+    mount.appendChild(this._overlay);
+    mount.appendChild(this._sheet);
   }
 
   _bindEvents() {

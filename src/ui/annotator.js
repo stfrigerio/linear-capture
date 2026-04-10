@@ -42,7 +42,7 @@ export class Annotator {
     wrap.appendChild(this._canvas);
     this._overlay.appendChild(wrap);
 
-    document.body.appendChild(this._overlay);
+    (document.getElementById('lc-root') || document.body).appendChild(this._overlay);
 
     // Load image then setup
     this._img = new Image();

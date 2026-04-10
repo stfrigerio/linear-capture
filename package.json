@@ -16,7 +16,8 @@
   "scripts": {
     "build": "node build.js",
     "dev": "node build.js --watch",
-    "demo": "npx serve ."
+    "demo": "npx serve .",
+    "prepare": "node build.js"
   },
   "keywords": [
     "linear",

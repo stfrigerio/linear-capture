@@ -96,17 +96,8 @@ export function dataURLtoBlob(dataURL) {
   return new Blob([arr], { type: mime });
 }
 
-/** Smart title suggestion based on element */
-export function suggestTitle(el) {
-  const component = getComponentName(el);
-  const tag = el.tagName.toLowerCase();
-  const text = truncate(el.innerText, 40);
-
-  if (component) return `[${component}] `;
-  if (tag === 'button' && text) return `Button "${text}" — `;
-  if (tag === 'input') return `Input [${el.type || 'text'}] — `;
-  if (tag === 'img') return `Image — `;
-  if (tag === 'a' && text) return `Link "${text}" — `;
+/** Title suggestion — disabled; user types their own. */
+export function suggestTitle() {
   return '';
 }
 

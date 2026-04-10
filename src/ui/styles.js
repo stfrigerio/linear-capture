@@ -278,6 +278,17 @@ export const STYLES = /* css */ `
   resize: vertical;
   font: 12px/1.6 var(--lc-font-mono);
 }
+.lc-description-textarea {
+  min-height: 72px;
+  font: 14px/1.5 var(--lc-font);
+}
+select.lc-input {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 34px;
+  cursor: pointer;
+}
 
 /* ── Priority selector ─────────────────────────────────────── */
 .lc-priority-group { display: flex; gap: 6px; }

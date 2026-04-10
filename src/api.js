@@ -43,6 +43,18 @@ export class LinearClient {
     return data.team.projects.nodes;
   }
 
+  /** Fetch milestones for a project */
+  async getProjectMilestones(projectId) {
+    const data = await this._graphql(`
+      query($projectId: String!) {
+        project(id: $projectId) {
+          projectMilestones { nodes { id name targetDate } }
+        }
+      }
+    `, { projectId });
+    return data.project?.projectMilestones?.nodes ?? [];
+  }
+
   /** Upload a file and return its asset URL */
   async uploadFile(blob, filename) {
     const data = await this._graphql(
@@ -71,9 +83,10 @@ export class LinearClient {
   }
 
   /** Create a Linear issue */
-  async createIssue({ title, description, teamId, projectId, labelIds, priority }) {
+  async createIssue({ title, description, teamId, projectId, projectMilestoneId, labelIds, priority }) {
     const input = { title, description, teamId };
     if (projectId) input.projectId = projectId;
+    if (projectMilestoneId) input.projectMilestoneId = projectMilestoneId;
     if (labelIds?.length) input.labelIds = labelIds;
     if (priority) input.priority = priority;
 

@@ -15,12 +15,16 @@ export class BottomSheet {
     this._sheet = null;
     this._context = null;
     this._priority = 0;
+    this._milestones = [];
+    this._milestoneId = '';
     this._screenshotDataURL = null;
   }
 
-  open(context, defaultPriority = 0) {
+  open(context, defaultPriority = 0, milestones = []) {
     this._context = context;
     this._priority = defaultPriority;
+    this._milestones = milestones;
+    this._milestoneId = '';
     this._screenshotDataURL = context.screenshotDataURL;
     this._render();
 
@@ -80,6 +84,12 @@ export class BottomSheet {
         </div>
 
         <div class="lc-field">
+          <label class="lc-label">Description</label>
+          <textarea class="lc-textarea lc-description-textarea"
+            placeholder="Add more detail (optional)"></textarea>
+        </div>
+
+        <div class="lc-field">
           <label class="lc-label">Priority</label>
           <div class="lc-priority-group">
             ${[
@@ -89,6 +99,18 @@ export class BottomSheet {
             ).join('')}
           </div>
         </div>
+
+        ${this._milestones.length ? `
+        <div class="lc-field">
+          <label class="lc-label">Milestone</label>
+          <select class="lc-input lc-milestone-select">
+            <option value="">None</option>
+            ${this._milestones.map(m =>
+              `<option value="${this._esc(m.id)}">${this._esc(m.name)}</option>`
+            ).join('')}
+          </select>
+        </div>
+        ` : ''}
 
         ${this._screenshotDataURL ? `
         <div class="lc-field">
@@ -162,6 +184,14 @@ export class BottomSheet {
       });
     }
 
+    // Milestone select
+    const milestoneSelect = this._sheet.querySelector('.lc-milestone-select');
+    if (milestoneSelect) {
+      milestoneSelect.addEventListener('change', (e) => {
+        this._milestoneId = e.target.value;
+      });
+    }
+
     // Submit
     this._sheet.querySelector('.lc-submit-btn').addEventListener('click', () => {
       const titleInput = this._sheet.querySelector('.lc-title-input');
@@ -173,12 +203,15 @@ export class BottomSheet {
         titleInput.addEventListener('input', () => titleInput.classList.remove('lc-error'), { once: true });
         return;
       }
-      const description = this._sheet.querySelector('.lc-context-textarea').value;
+      const userDescription = this._sheet.querySelector('.lc-description-textarea').value.trim();
+      const context = this._sheet.querySelector('.lc-context-textarea').value;
       this._setSubmitting(true);
       this._onSubmit({
         title,
-        description,
+        userDescription,
+        context,
         priority: this._priority,
+        projectMilestoneId: this._milestoneId,
         screenshotDataURL: this._screenshotDataURL,
       });
     });

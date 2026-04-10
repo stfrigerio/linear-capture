@@ -130,7 +130,10 @@ export class LinearCapture {
     try {
       const context = await this._contextBuilder.build(el);
       context._suggestedTitle = suggestTitle(el);
-      this._openSheet(context);
+
+      // Pre-fetch milestones in parallel with sheet opening
+      const milestones = await this._fetchMilestones();
+      this._openSheet(context, milestones);
     } catch (err) {
       console.error('[LinearCapture] Context build failed:', err);
       showToast('Failed to capture context', 'error');
@@ -139,12 +142,24 @@ export class LinearCapture {
     }
   }
 
-  _openSheet(context) {
+  async _fetchMilestones() {
+    const cfg = this._config;
+    if (!cfg.apiKey || !cfg.projectId) return [];
+    try {
+      const client = new LinearClient(cfg.apiKey);
+      return await client.getProjectMilestones(cfg.projectId);
+    } catch (err) {
+      console.warn('[LinearCapture] Failed to fetch milestones:', err);
+      return [];
+    }
+  }
+
+  _openSheet(context, milestones = []) {
     this._sheet = new BottomSheet({
       onSubmit: data => this._onSubmit(data),
       onCancel: () => { this._sheet = null; },
     });
-    this._sheet.open(context, this._config.defaultPriority);
+    this._sheet.open(context, this._config.defaultPriority, milestones);
   }
 
   _openSettings() {
@@ -162,7 +177,7 @@ export class LinearCapture {
     this._settings.open(this._config);
   }
 
-  async _onSubmit({ title, description, priority, screenshotDataURL }) {
+  async _onSubmit({ title, userDescription, context, priority, projectMilestoneId, screenshotDataURL }) {
     const cfg = this._config;
 
     if (!isConfigured(cfg)) {
@@ -173,7 +188,9 @@ export class LinearCapture {
     }
 
     const client = new LinearClient(cfg.apiKey);
-    let finalDescription = description;
+    let finalDescription = userDescription
+      ? `${userDescription}\n\n---\n\n${context}`
+      : context;
 
     try {
       // Upload screenshot
@@ -193,6 +210,7 @@ export class LinearCapture {
         description: finalDescription,
         teamId: cfg.teamId,
         projectId: cfg.projectId,
+        projectMilestoneId: projectMilestoneId || undefined,
         labelIds: cfg.labelIds,
         priority: priority || undefined,
       });

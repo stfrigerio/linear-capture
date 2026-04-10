@@ -63,6 +63,22 @@ export const STYLES = /* css */ `
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+/* Defensive reset against host CSS bleeding into the widget.
+   Uses #lc-root specificity so it beats most host rules without needing !important. */
+#lc-root h1, #lc-root h2, #lc-root h3,
+#lc-root h4, #lc-root h5, #lc-root h6 {
+  color: inherit;
+  background: none;
+  background-clip: border-box;
+  -webkit-background-clip: border-box;
+  -webkit-text-fill-color: currentColor;
+  font-family: inherit;
+}
+#lc-root input, #lc-root textarea, #lc-root select {
+  color: inherit;
+  min-height: auto;
+  -webkit-text-fill-color: currentColor;
+}
 
 /* ── FAB ───────────────────────────────────────────────────── */
 .lc-fab {

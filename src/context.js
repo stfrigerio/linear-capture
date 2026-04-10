@@ -185,6 +185,25 @@ export class ContextBuilder {
         logging: false,
         scale: Math.min(window.devicePixelRatio, 2),
         backgroundColor: null,
+        onclone: (clonedDoc, clonedElement) => {
+          // html2canvas can't render `background-clip: text` — the gradient
+          // leaks out as a solid block. Walk the clone and flatten any node
+          // using that trick so headings render as plain text in the capture.
+          const view = clonedDoc.defaultView || window;
+          const nodes = [clonedElement, ...clonedElement.querySelectorAll('*')];
+          for (const node of nodes) {
+            const cs = view.getComputedStyle(node);
+            const clip = cs.webkitBackgroundClip || cs.backgroundClip;
+            if (clip !== 'text') continue;
+            node.style.setProperty('background', 'none', 'important');
+            node.style.setProperty('background-clip', 'border-box', 'important');
+            node.style.setProperty('-webkit-background-clip', 'border-box', 'important');
+            node.style.setProperty('-webkit-text-fill-color', 'currentColor', 'important');
+            if (cs.color === 'rgba(0, 0, 0, 0)' || cs.color === 'transparent') {
+              node.style.setProperty('color', '#1a1a2e', 'important');
+            }
+          }
+        },
       });
       context.screenshotDataURL = canvas.toDataURL('image/png');
     } catch (err) {

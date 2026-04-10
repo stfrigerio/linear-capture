@@ -8,7 +8,6 @@ import { STYLES } from './ui/styles.js';
 import { FAB } from './ui/fab.js';
 import { Banner } from './ui/banner.js';
 import { BottomSheet } from './ui/sheet.js';
-import { SettingsPanel } from './ui/settings.js';
 import { showToast } from './ui/toast.js';
 
 /**
@@ -16,7 +15,6 @@ import { showToast } from './ui/toast.js';
  */
 export class LinearCapture {
   constructor(inlineConfig = {}) {
-    this._inlineConfig = inlineConfig;
     this._config = resolveConfig(inlineConfig);
     this._root = null;
     this._fab = null;
@@ -24,21 +22,20 @@ export class LinearCapture {
     this._picker = new ElementPicker(el => this._onElementSelected(el));
     this._contextBuilder = new ContextBuilder();
     this._sheet = null;
-    this._settings = null;
     this._picking = false;
     this._styleEl = null;
     this._keyHandler = null;
   }
 
   init() {
+    if (!isConfigured(this._config)) {
+      console.warn('[LinearCapture] Missing apiKey or teamId — pass them via the constructor config.');
+      return;
+    }
+
     this._injectStyles();
     this._createRoot();
     this._bindKeyboard();
-
-    // Show settings on first run if not configured
-    if (!isConfigured(this._config)) {
-      setTimeout(() => this._openSettings(), 800);
-    }
 
     console.log(
       '%c[LinearCapture]%c Initialized — %s to toggle picker',
@@ -52,7 +49,6 @@ export class LinearCapture {
     this._fab?.destroy();
     this._banner?.destroy();
     this._sheet?.close();
-    this._settings?.close();
     this._root?.remove();
     this._styleEl?.remove();
     if (this._keyHandler) {
@@ -74,7 +70,6 @@ export class LinearCapture {
     // FAB
     this._fab = new FAB({
       onToggle: () => this._onFABClick(),
-      onSettings: () => this._openSettings(),
     });
     const [fabEl, hintEl] = this._fab.render();
     this._root.appendChild(fabEl);
@@ -162,31 +157,8 @@ export class LinearCapture {
     this._sheet.open(context, this._config.defaultPriority, milestones);
   }
 
-  _openSettings() {
-    if (this._settings) return;
-    this._settings = new SettingsPanel({
-      onSave: (config) => {
-        this._config = resolveConfig(this._inlineConfig);
-        showToast('Settings saved', 'success');
-        this._settings = null;
-      },
-      onClose: () => {
-        this._settings = null;
-      },
-    });
-    this._settings.open(this._config);
-  }
-
   async _onSubmit({ title, userDescription, context, priority, projectMilestoneId, screenshotDataURL }) {
     const cfg = this._config;
-
-    if (!isConfigured(cfg)) {
-      showToast('Please configure your API key first', 'error');
-      this._sheet?.setError();
-      this._openSettings();
-      return;
-    }
-
     const client = new LinearClient(cfg.apiKey);
     let finalDescription = userDescription
       ? `${userDescription}\n\n---\n\n${context}`

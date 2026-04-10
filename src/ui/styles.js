@@ -103,23 +103,6 @@ export const STYLES = /* css */ `
 }
 .lc-fab.lc-intro { animation: lc-fab-pulse 1.5s ease 0.5s 2; }
 
-/* Settings gear on FAB */
-.lc-fab-gear {
-  position: absolute;
-  top: -4px;
-  right: -4px;
-  width: 20px;
-  height: 20px;
-  background: var(--lc-bg-solid);
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: var(--lc-shadow-sm);
-  cursor: pointer;
-}
-.lc-fab-gear svg { width: 11px; height: 11px; stroke: var(--lc-text-secondary); }
-
 /* ── Picking mode ──────────────────────────────────────────── */
 .lc-highlight {
   outline: 2.5px solid var(--lc-accent) !important;
@@ -553,79 +536,6 @@ select.lc-input {
   cursor: crosshair;
   touch-action: none;
 }
-
-/* ── Settings panel ────────────────────────────────────────── */
-.lc-settings {
-  position: fixed;
-  inset: 0;
-  z-index: 2147483647;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-  opacity: 0;
-  transition: opacity 0.3s var(--lc-ease);
-  pointer-events: none;
-}
-.lc-settings.lc-visible { opacity: 1; pointer-events: auto; }
-
-.lc-settings-backdrop {
-  position: absolute; inset: 0;
-  background: rgba(0,0,0,0.4);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-}
-.lc-settings-card {
-  position: relative;
-  width: 100%;
-  max-width: 420px;
-  background: var(--lc-bg);
-  backdrop-filter: blur(40px) saturate(180%);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
-  border-radius: var(--lc-radius-lg);
-  box-shadow: var(--lc-shadow-lg);
-  border: 1px solid var(--lc-border);
-  overflow: hidden;
-  transform: scale(0.95) translateY(10px);
-  transition: transform 0.35s var(--lc-spring);
-}
-.lc-settings.lc-visible .lc-settings-card {
-  transform: scale(1) translateY(0);
-}
-.lc-settings-header {
-  padding: 20px 20px 0;
-}
-.lc-settings-header h2 {
-  font-size: 18px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  margin-bottom: 4px;
-}
-.lc-settings-header p {
-  font-size: 13px;
-  color: var(--lc-text-secondary);
-  line-height: 1.5;
-}
-.lc-settings-body { padding: 16px 20px; }
-.lc-settings-footer {
-  padding: 12px 20px 20px;
-  display: flex;
-  gap: 10px;
-}
-.lc-settings .lc-field { margin-bottom: 14px; }
-.lc-settings .lc-input { font-size: 13px; padding: 9px 12px; }
-
-.lc-settings-hint {
-  font-size: 11px;
-  color: var(--lc-text-muted);
-  margin-top: 4px;
-  line-height: 1.4;
-}
-.lc-settings-hint a {
-  color: var(--lc-accent);
-  text-decoration: none;
-}
-.lc-settings-hint a:hover { text-decoration: underline; }
 
 /* ── Shortcut hint ─────────────────────────────────────────── */
 .lc-shortcut-hint {

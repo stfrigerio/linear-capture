@@ -1,15 +1,13 @@
-import { ICON_TARGET, ICON_CLOSE, ICON_SETTINGS } from '../icons.js';
+import { ICON_TARGET, ICON_CLOSE } from '../icons.js';
 import { isMac } from '../utils.js';
 
 /**
  * Floating Action Button — the entry point for LinearCapture.
  * Shows a target icon that toggles the element picker.
- * Has a settings gear overlay.
  */
 export class FAB {
-  constructor({ onToggle, onSettings }) {
+  constructor({ onToggle }) {
     this._onToggle = onToggle;
-    this._onSettings = onSettings;
     this._el = null;
     this._hint = null;
     this._active = false;
@@ -26,16 +24,6 @@ export class FAB {
       e.stopPropagation();
       this._onToggle();
     });
-
-    // Settings gear
-    const gear = document.createElement('div');
-    gear.className = 'lc-fab-gear';
-    gear.innerHTML = ICON_SETTINGS;
-    gear.addEventListener('click', (e) => {
-      e.stopPropagation();
-      this._onSettings();
-    });
-    this._el.appendChild(gear);
 
     // Keyboard shortcut hint
     this._hint = document.createElement('div');
@@ -65,15 +53,6 @@ export class FAB {
     } else {
       this._el.classList.remove('lc-active');
       this._el.innerHTML = ICON_TARGET;
-      // Re-add gear
-      const gear = document.createElement('div');
-      gear.className = 'lc-fab-gear';
-      gear.innerHTML = ICON_SETTINGS;
-      gear.addEventListener('click', (e) => {
-        e.stopPropagation();
-        this._onSettings();
-      });
-      this._el.appendChild(gear);
     }
   }
 

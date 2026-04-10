@@ -167,8 +167,24 @@ export const STYLES = /* css */ `
   display: flex;
   flex-direction: column;
   box-shadow: 0 -4px 40px rgba(0,0,0,0.12);
+  font-family: var(--lc-font);
+  color: var(--lc-text);
 }
 .lc-sheet.lc-visible { transform: translateY(0); }
+
+@media (min-width: 768px) {
+  .lc-sheet {
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    max-width: 560px;
+    margin-left: auto;
+    margin-right: auto;
+    max-height: 82vh;
+    border-radius: var(--lc-radius-lg);
+    box-shadow: var(--lc-shadow-lg);
+  }
+}
 
 .lc-handle {
   width: 36px; height: 4px;

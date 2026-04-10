@@ -173,7 +173,8 @@ export class LinearCapture {
           finalDescription += `\n\n## Screenshot\n![Element screenshot](${assetUrl})\n`;
         } catch (err) {
           console.warn('[LinearCapture] Screenshot upload failed:', err);
-          finalDescription += '\n\n> Screenshot upload failed\n';
+          const detail = err?.message || String(err);
+          finalDescription += `\n\n> Screenshot upload failed: ${detail}\n`;
         }
       }
 

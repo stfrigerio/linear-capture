@@ -4,8 +4,10 @@ import { dataURLtoBlob } from './utils.js';
  * Linear GraphQL API client.
  */
 export class LinearClient {
-  constructor(apiKey) {
+  constructor(apiKey, options = {}) {
     this._apiKey = apiKey;
+    this._uploadProxyUrl = options.uploadProxyUrl || null;
+    this._uploadProxyHeaders = options.uploadProxyHeaders || null;
   }
 
   async _graphql(query, variables = {}) {
@@ -57,6 +59,38 @@ export class LinearClient {
 
   /** Upload a file and return its asset URL */
   async uploadFile(blob, filename) {
+    // Proxy mode — POST the blob to a backend endpoint that runs the Linear
+    // upload flow server-side. Used to sidestep the S3 CORS preflight that
+    // blocks PUT requests with Linear's custom headers from non-linear.app
+    // origins (i.e. every self-hosted app embedding this widget).
+    if (this._uploadProxyUrl) {
+      const form = new FormData();
+      form.append('file', blob, filename);
+      const extraHeaders =
+        typeof this._uploadProxyHeaders === 'function'
+          ? this._uploadProxyHeaders() || {}
+          : this._uploadProxyHeaders || {};
+      const res = await fetch(this._uploadProxyUrl, {
+        method: 'POST',
+        headers: extraHeaders, // don't set Content-Type — FormData sets the multipart boundary
+        body: form,
+        credentials: 'include',
+      });
+      if (!res.ok) {
+        const text = await res.text().catch(() => '');
+        let detail = text;
+        try {
+          const json = JSON.parse(text);
+          if (json?.error) detail = json.error;
+        } catch {}
+        throw new Error(`Upload proxy failed: ${res.status} ${detail}`.trim());
+      }
+      const json = await res.json();
+      if (!json?.assetUrl) throw new Error('Upload proxy returned no assetUrl');
+      return json.assetUrl;
+    }
+
+    // Direct mode — two-step: fetch a signed S3 URL, then PUT the blob to it.
     const data = await this._graphql(
       `mutation($contentType: String!, $filename: String!, $size: Int!) {
         fileUpload(contentType: $contentType, filename: $filename, size: $size) {

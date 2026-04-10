@@ -159,7 +159,10 @@ export class LinearCapture {
 
   async _onSubmit({ title, userDescription, context, priority, projectMilestoneId, screenshotDataURL }) {
     const cfg = this._config;
-    const client = new LinearClient(cfg.apiKey);
+    const client = new LinearClient(cfg.apiKey, {
+      uploadProxyUrl: cfg.uploadProxyUrl,
+      uploadProxyHeaders: cfg.uploadProxyHeaders,
+    });
     let finalDescription = userDescription
       ? `${userDescription}\n\n---\n\n${context}`
       : context;

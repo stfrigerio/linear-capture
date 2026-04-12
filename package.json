@@ -1,6 +1,6 @@
 {
   "name": "@stfrigerio/linear-capture",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "In-page visual bug reporter for Linear — point, annotate, file.",
   "main": "dist/linear-capture.js",
   "module": "dist/linear-capture.esm.js",

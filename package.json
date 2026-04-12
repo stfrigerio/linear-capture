@@ -1,5 +1,5 @@
 {
-  "name": "linear-capture",
+  "name": "@stfrigerio/linear-capture",
   "version": "1.0.0",
   "description": "In-page visual bug reporter for Linear — point, annotate, file.",
   "main": "dist/linear-capture.js",
@@ -13,11 +13,19 @@
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stfrigerio/linear-capture.git"
+  },
   "scripts": {
     "build": "node build.js",
     "dev": "node build.js --watch",
     "demo": "npx serve .",
-    "prepare": "node build.js"
+    "prepare": "node build.js",
+    "release": "bash -c 'set -a && source .env && set +a && source ~/.bash_functions && pushino \"releasing new stuff\" && npm version patch && npm run build && npm publish && git push'"
   },
   "keywords": [
     "linear",

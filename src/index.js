@@ -1,5 +1,6 @@
 import { LinearCapture } from './core.js';
 import { resolveConfig } from './config.js';
+import { startCapture } from './context.js';
 
 // ── Auto-init ─────────────────────────────────────────────────
 // Reads config from window.__LINEAR_CAPTURE__ and activates
@@ -10,6 +11,8 @@ const merged = resolveConfig(userConfig);
 const params = new URLSearchParams(location.search);
 
 if (params.get(merged.flagParam) === merged.flagValue) {
+  // Catch errors from page load on, not only from when the widget renders.
+  startCapture([merged.apiProxyUrl, merged.uploadProxyUrl].filter(Boolean));
   const boot = () => {
     const instance = new LinearCapture(userConfig);
     instance.init();
@@ -25,7 +28,7 @@ if (params.get(merged.flagParam) === merged.flagValue) {
 
 // ── Exports ───────────────────────────────────────────────────
 // For programmatic use:
-//   import LinearCapture from 'linear-capture'
+//   import LinearCapture from '@stfrigerio/linear-capture'
 //   const lc = new LinearCapture({ teamId: '...' })
 //   lc.init()
 

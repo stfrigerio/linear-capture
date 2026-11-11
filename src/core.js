@@ -1,7 +1,7 @@
 import { resolveConfig, isConfigured } from './config.js';
 import { suggestTitle, isMac } from './utils.js';
 import { ElementPicker } from './picker.js';
-import { ContextBuilder } from './context.js';
+import { ContextBuilder, startCapture } from './context.js';
 import { LinearClient } from './api.js';
 import { dataURLtoBlob } from './utils.js';
 import { STYLES } from './ui/styles.js';
@@ -29,10 +29,12 @@ export class LinearCapture {
 
   init() {
     if (!isConfigured(this._config)) {
-      console.warn('[LinearCapture] Missing apiKey or teamId — pass them via the constructor config.');
+      console.warn('[LinearCapture] Missing teamId, or both apiKey and apiProxyUrl — pass them via the constructor config.');
       return;
     }
 
+    const cfg = this._config;
+    startCapture([cfg.apiProxyUrl, cfg.uploadProxyUrl].filter(Boolean));
     this._injectStyles();
     this._createRoot();
     this._bindKeyboard();
@@ -123,11 +125,12 @@ export class LinearCapture {
     showToast('Capturing context\u2026');
 
     try {
-      const context = await this._contextBuilder.build(el);
+      // The screenshot and the milestones at the same time
+      const [context, milestones] = await Promise.all([
+        this._contextBuilder.build(el),
+        this._fetchMilestones(),
+      ]);
       context._suggestedTitle = suggestTitle(el);
-
-      // Pre-fetch milestones in parallel with sheet opening
-      const milestones = await this._fetchMilestones();
       this._openSheet(context, milestones);
     } catch (err) {
       console.error('[LinearCapture] Context build failed:', err);
@@ -137,12 +140,21 @@ export class LinearCapture {
     }
   }
 
+  _client() {
+    const cfg = this._config;
+    return new LinearClient(cfg.apiKey, {
+      apiProxyUrl: cfg.apiProxyUrl,
+      uploadProxyUrl: cfg.uploadProxyUrl,
+      proxyHeaders: cfg.proxyHeaders,
+      uploadProxyHeaders: cfg.uploadProxyHeaders,
+    });
+  }
+
   async _fetchMilestones() {
     const cfg = this._config;
-    if (!cfg.apiKey || !cfg.projectId) return [];
+    if (!cfg.projectId) return [];
     try {
-      const client = new LinearClient(cfg.apiKey);
-      return await client.getProjectMilestones(cfg.projectId);
+      return await this._client().getProjectMilestones(cfg.projectId);
     } catch (err) {
       console.warn('[LinearCapture] Failed to fetch milestones:', err);
       return [];
@@ -159,10 +171,7 @@ export class LinearCapture {
 
   async _onSubmit({ title, userDescription, context, priority, projectMilestoneId, screenshotDataURL }) {
     const cfg = this._config;
-    const client = new LinearClient(cfg.apiKey, {
-      uploadProxyUrl: cfg.uploadProxyUrl,
-      uploadProxyHeaders: cfg.uploadProxyHeaders,
-    });
+    const client = this._client();
     let finalDescription = userDescription
       ? `${userDescription}\n\n---\n\n${context}`
       : context;

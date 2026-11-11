@@ -1,23 +1,34 @@
-import { dataURLtoBlob } from './utils.js';
+import { MILESTONES_QUERY, FILE_UPLOAD_MUTATION, ISSUE_CREATE_MUTATION } from './queries.js';
 
 /**
  * Linear GraphQL API client.
  */
+export const LINEAR_GRAPHQL_URL = 'https://api.linear.app/graphql';
+
+function resolveHeaders(h) {
+  return (typeof h === 'function' ? h() : h) || {};
+}
+
 export class LinearClient {
   constructor(apiKey, options = {}) {
     this._apiKey = apiKey;
+    this._apiProxyUrl = options.apiProxyUrl || null;
     this._uploadProxyUrl = options.uploadProxyUrl || null;
-    this._uploadProxyHeaders = options.uploadProxyHeaders || null;
+    this._proxyHeaders = options.proxyHeaders || null;
+    this._uploadProxyHeaders = options.uploadProxyHeaders || options.proxyHeaders || null;
   }
 
   async _graphql(query, variables = {}) {
-    const res = await fetch('https://api.linear.app/graphql', {
+    // Through your own backend when apiProxyUrl is set: the key stays there.
+    const proxied = !!this._apiProxyUrl;
+    const headers = { 'Content-Type': 'application/json' };
+    if (proxied) Object.assign(headers, resolveHeaders(this._proxyHeaders));
+    else headers.Authorization = this._apiKey;
+    const res = await fetch(proxied ? this._apiProxyUrl : LINEAR_GRAPHQL_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: this._apiKey,
-      },
+      headers,
       body: JSON.stringify({ query, variables }),
+      ...(proxied ? { credentials: 'include' } : {}),
     });
     if (!res.ok) throw new Error(`Linear API ${res.status}: ${res.statusText}`);
     const json = await res.json();
@@ -47,13 +58,7 @@ export class LinearClient {
 
   /** Fetch milestones for a project */
   async getProjectMilestones(projectId) {
-    const data = await this._graphql(`
-      query($projectId: String!) {
-        project(id: $projectId) {
-          projectMilestones { nodes { id name targetDate } }
-        }
-      }
-    `, { projectId });
+    const data = await this._graphql(MILESTONES_QUERY, { projectId });
     return data.project?.projectMilestones?.nodes ?? [];
   }
 
@@ -66,10 +71,7 @@ export class LinearClient {
     if (this._uploadProxyUrl) {
       const form = new FormData();
       form.append('file', blob, filename);
-      const extraHeaders =
-        typeof this._uploadProxyHeaders === 'function'
-          ? this._uploadProxyHeaders() || {}
-          : this._uploadProxyHeaders || {};
+      const extraHeaders = resolveHeaders(this._uploadProxyHeaders);
       const res = await fetch(this._uploadProxyUrl, {
         method: 'POST',
         headers: extraHeaders, // don't set Content-Type — FormData sets the multipart boundary
@@ -92,15 +94,7 @@ export class LinearClient {
 
     // Direct mode — two-step: fetch a signed S3 URL, then PUT the blob to it.
     const data = await this._graphql(
-      `mutation($contentType: String!, $filename: String!, $size: Int!) {
-        fileUpload(contentType: $contentType, filename: $filename, size: $size) {
-          uploadFile {
-            uploadUrl
-            assetUrl
-            headers { key value }
-          }
-        }
-      }`,
+      FILE_UPLOAD_MUTATION,
       { contentType: blob.type, filename, size: blob.size },
     );
 
@@ -126,12 +120,7 @@ export class LinearClient {
     if (priority) input.priority = priority;
 
     const data = await this._graphql(
-      `mutation($input: IssueCreateInput!) {
-        issueCreate(input: $input) {
-          success
-          issue { id identifier url }
-        }
-      }`,
+      ISSUE_CREATE_MUTATION,
       { input },
     );
 

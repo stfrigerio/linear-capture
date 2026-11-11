@@ -1,4 +1,4 @@
-import { getCSSPath, getDataAttributes, getComponentName, truncate } from './utils.js';
+import { getCSSPath, getDataAttributes, getComponentName, truncate, redactUrl } from './utils.js';
 
 // ── html2canvas lazy loader ───────────────────────────────────
 let _h2cPromise = null;
@@ -69,9 +69,11 @@ class ConsoleCapture {
 // ── Network Capture ───────────────────────────────────────────
 
 class NetworkCapture {
-  constructor(maxEntries = 30) {
+  constructor(ignore = [], maxEntries = 30) {
     this._entries = [];
     this._max = maxEntries;
+    // Our own traffic: Linear, the html2canvas CDN, and any proxies.
+    this._ignore = ['api.linear.app', 'cdn.jsdelivr.net', ...ignore];
     this._patchFetch();
     this._patchXHR();
   }
@@ -127,20 +129,26 @@ class NetworkCapture {
   }
 
   _record(entry) {
-    // Skip our own requests
-    if (entry.url?.includes('api.linear.app')) return;
-    if (entry.url?.includes('cdn.jsdelivr.net')) return;
-    this._entries.push({ ...entry, timestamp: new Date().toISOString() });
+    if (this._ignore.some(part => entry.url?.includes(part))) return;
+    this._entries.push({ ...entry, url: redactUrl(entry.url), timestamp: new Date().toISOString() });
     if (this._entries.length > this._max) this._entries.shift();
   }
 
   getEntries() { return [...this._entries]; }
 }
 
-// ── Singletons (start capturing immediately) ─────────────────
+// ── Singletons (started on demand) ───────────────────────────
+// Nothing is patched until the widget is turned on: importing the package
+// leaves console, fetch and XMLHttpRequest alone.
 
-export const consoleCapture = new ConsoleCapture();
-export const networkCapture = new NetworkCapture();
+let consoleCapture = null;
+let networkCapture = null;
+
+/** Start capturing console errors and failed requests (idempotent). */
+export function startCapture(ignore = []) {
+  if (!consoleCapture) consoleCapture = new ConsoleCapture();
+  if (!networkCapture) networkCapture = new NetworkCapture(ignore);
+}
 
 // ── Context Builder ───────────────────────────────────────────
 
@@ -161,7 +169,7 @@ export class ContextBuilder {
         y: Math.round(rect.y),
       },
       computedStyles: this._getRelevantStyles(element),
-      url: location.href,
+      url: redactUrl(location.href),
       path: location.pathname,
       hash: location.hash,
       viewport: {
@@ -172,8 +180,8 @@ export class ContextBuilder {
       userAgent: navigator.userAgent,
       timestamp: new Date().toISOString(),
       debugState: window.__DEBUG_STATE || null,
-      consoleErrors: consoleCapture.getErrors(),
-      networkFailures: networkCapture.getEntries(),
+      consoleErrors: consoleCapture?.getErrors() ?? [],
+      networkFailures: networkCapture?.getEntries() ?? [],
       screenshotDataURL: null,
     };
 
@@ -186,6 +194,10 @@ export class ContextBuilder {
         scale: Math.min(window.devicePixelRatio, 2),
         backgroundColor: null,
         onclone: (clonedDoc, clonedElement) => {
+          // html2canvas paints the captured element's own box-shadow across
+          // it, tinting the whole screenshot grey; the shadow falls outside
+          // the capture anyway, so drop it from the clone.
+          clonedElement.style.setProperty('box-shadow', 'none', 'important');
           // html2canvas can't render `background-clip: text` — the gradient
           // leaks out as a solid block. Walk the clone and flatten any node
           // using that trick so headings render as plain text in the capture.

@@ -34,9 +34,15 @@ async function build() {
     minify: true,
   });
 
+  // The query list for backend proxies: no browser code, ESM + CommonJS
+  for (const [format, outfile] of [['esm', 'dist/queries.mjs'], ['cjs', 'dist/queries.cjs']]) {
+    await esbuild.build({ entryPoints: ['src/queries.js'], bundle: true, platform: 'neutral', format, outfile });
+  }
+
   console.log('✓ Built dist/linear-capture.esm.js');
   console.log('✓ Built dist/linear-capture.js');
   console.log('✓ Built dist/linear-capture.min.js');
+  console.log('✓ Built dist/queries.mjs, dist/queries.cjs');
 }
 
 if (watch) {

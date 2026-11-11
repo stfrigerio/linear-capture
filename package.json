@@ -2,12 +2,38 @@
   "name": "@stfrigerio/linear-capture",
   "version": "1.0.1",
   "description": "In-page visual bug reporter for Linear — point, annotate, file.",
+  "keywords": [
+    "linear",
+    "bug-reporter",
+    "visual-feedback",
+    "devtools",
+    "capture",
+    "screenshot",
+    "bug-report",
+    "linear-app",
+    "issue-tracker",
+    "screenshot-annotation"
+  ],
+  "homepage": "https://github.com/stfrigerio/linear-capture#readme",
+  "bugs": {
+    "url": "https://github.com/stfrigerio/linear-capture/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stfrigerio/linear-capture.git"
+  },
+  "license": "MIT",
+  "author": "Stefano Frigerio",
   "main": "dist/linear-capture.js",
   "module": "dist/linear-capture.esm.js",
   "exports": {
     ".": {
       "import": "./dist/linear-capture.esm.js",
       "require": "./dist/linear-capture.js"
+    },
+    "./queries": {
+      "import": "./dist/queries.mjs",
+      "require": "./dist/queries.cjs"
     }
   },
   "files": [
@@ -16,27 +42,13 @@
   "publishConfig": {
     "access": "public"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/stfrigerio/linear-capture.git"
-  },
   "scripts": {
     "build": "node build.js",
     "dev": "node build.js --watch",
-    "demo": "npx serve .",
+    "demo": "npx serve . -l 4173",
     "prepare": "node build.js",
-    "release": "bash -c 'set -a && source .env && set +a && source ~/.bash_functions && pushino \"releasing new stuff\" && npm version patch && npm run build && npm publish && git push'"
+    "release": "bash -c 'set -a; [ -f .env ] && . ./.env; set +a; npm version minor && npm publish && git push --follow-tags'"
   },
-  "keywords": [
-    "linear",
-    "bug-reporter",
-    "visual-feedback",
-    "devtools",
-    "capture",
-    "screenshot"
-  ],
-  "author": "",
-  "license": "MIT",
   "devDependencies": {
     "esbuild": "^0.25.0"
   }

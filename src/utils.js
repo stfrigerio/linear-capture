@@ -32,8 +32,9 @@ export function getDataAttributes(el) {
 
 /** Detect component name from React fiber, Vue instance, or data attrs */
 export function getComponentName(el) {
-  if (el.dataset.component) return el.dataset.component;
-  if (el.dataset.testid) return el.dataset.testid;
+  // The nearest marked element: the click usually lands on a child of it.
+  const marked = el.closest('[data-component]') || el.closest('[data-testid]');
+  if (marked) return marked.dataset.component || marked.dataset.testid;
 
   // React fiber
   const fiberKey = Object.keys(el).find(
@@ -68,6 +69,31 @@ export function getComponentName(el) {
   }
 
   return null;
+}
+
+// Query parameters whose values never leave the page in a report.
+const SECRET_PARAM = /token|secret|passw|session|signature|credential|jwt|bearer|^auth(orization)?$|api[_-]?key|access[_-]?key|private[_-]?key|^key$|^sig$|^code$/i;
+
+/** A URL with the values of secret-looking query parameters replaced. */
+export function redactUrl(url) {
+  if (!url) return url;
+  try {
+    const u = new URL(url, location.href);
+    let changed = false;
+    for (const k of [...u.searchParams.keys()]) {
+      if (SECRET_PARAM.test(k)) {
+        u.searchParams.set(k, 'REDACTED');
+        changed = true;
+      }
+    }
+    if (/^(access_token|id_token|token)=/i.test(u.hash.slice(1))) {
+      u.hash = '#REDACTED';
+      changed = true;
+    }
+    return changed ? u.toString() : url;
+  } catch {
+    return url;
+  }
 }
 
 export function truncate(str, max = 120) {

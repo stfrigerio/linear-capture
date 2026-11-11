@@ -47,7 +47,7 @@
     "dev": "node build.js --watch",
     "demo": "npx serve . -l 4173",
     "prepare": "node build.js",
-    "release": "bash -c 'set -a; [ -f .env ] && . ./.env; set +a; npm version minor && npm publish && git push --follow-tags'"
+    "release": "npm version minor && git push --follow-tags"
   },
   "devDependencies": {
     "esbuild": "^0.25.0"

@@ -1,0 +1,28 @@
+name: Publish to npm
+
+# A version tag (npm run release pushes one) publishes that version.
+# npm trusted publishing: npm checks this workflow's identity with GitHub,
+# so no token is stored anywhere, and the package gets a provenance badge.
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+          package-manager-cache: false   # never cache in release builds
+      - run: npm install -g npm@11        # trusted publishing needs npm 11.5.1+
+      - name: The tag matches package.json
+        run: test "v$(node -p "require('./package.json').version")" = "$GITHUB_REF_NAME"
+      - run: npm ci                       # also builds dist/ (prepare)
+      - run: npm publish

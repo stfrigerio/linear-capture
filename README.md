@@ -165,6 +165,11 @@ npm run demo    # serve the demo at http://localhost:4173/demo/
 npm run build
 ```
 
+Releases: `npm run release` bumps the minor version and pushes its tag; the
+[publish workflow](.github/workflows/publish.yml) then publishes it to npm
+from GitHub Actions, with [trusted publishing](https://docs.npmjs.com/trusted-publishers)
+(no npm token anywhere) and provenance.
+
 ## License
 
 MIT

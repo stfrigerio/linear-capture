@@ -40,6 +40,12 @@ would have received.
 npm install @stfrigerio/linear-capture
 ```
 
+> The npm release is still 1.0.1. What this README describes beyond it (the
+> proxy options and `/queries`, capture starting only once enabled, URL
+> redaction, the capture fixes) is in this repo and comes with the next
+> release; until then build it yourself: `npm install && npm run build`, then
+> use `dist/`.
+
 ```js
 import LinearCapture from '@stfrigerio/linear-capture';
 

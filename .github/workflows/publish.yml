@@ -21,8 +21,19 @@ jobs:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org'
           package-manager-cache: false   # never cache in release builds
-      - run: npm install -g npm@11        # trusted publishing needs npm 11.5.1+
       - name: The tag matches package.json
         run: test "v$(node -p "require('./package.json').version")" = "$GITHUB_REF_NAME"
+      - name: Skip a version that is already on npm
+        id: check
+        run: |
+          spec="$(node -p "require('./package.json').name")@$(node -p "require('./package.json').version")"
+          if npm view "$spec" version >/dev/null 2>&1; then
+            echo "$spec is already published, nothing to do"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+      - run: npm install -g npm@11        # trusted publishing needs npm 11.5.1+
+        if: steps.check.outputs.skip != 'true'
       - run: npm ci                       # also builds dist/ (prepare)
+        if: steps.check.outputs.skip != 'true'
       - run: npm publish
+        if: steps.check.outputs.skip != 'true'
